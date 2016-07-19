@@ -60,42 +60,42 @@ if (isset($_GET['action'])) {
             $pfAgentModule  = new PluginFusioninventoryAgentModule();
             $pfTask         = new PluginFusioninventoryTask();
 
-            $a_agent = $pfAgent->InfosByKey(Toolbox::addslashes_deep($_GET['machineid']));
-            if (isset($a_agent['id'])) {
+            $agent = $pfAgent->InfosByKey(Toolbox::addslashes_deep($_GET['machineid']));
+            if (isset($agent['id'])) {
                $taskjobstates = $pfTask->getTaskjobstatesForAgent(
-                  $a_agent['id'],
+                  $agent['id'],
                   array('collect')
                );
-               foreach ($taskjobstates as $className => $taskjobstate) {
+               $order = new \stdClass();
+               $order->jobs = array();
+
+               foreach ($taskjobstates as $taskjobstate) {
                   if (!$pfAgentModule->isAgentCanDo("Collect", $agent['id'])) {
                      $taskjobstate->cancel(
                         __("Collect module has been disabled for this agent", 'fusioninventory')
                      );
                   } else {
-                     $order = new \stdClass();
-                     $order->jobs = array();
-                     foreach ($taskjobstate as $data) {
-                        $out = $pfCollect->run($data, $a_agent);
-                        if (count($out) > 0) {
-                           $oder->jobs[] = $out;
-                        }
-
-                        // change status of state table row
-                        $pfTaskjobstate->changeStatus(
-                           $jobstate['id'],
-                           PluginFusioninventoryTaskjobstate::AGENT_HAS_SENT_DATA
-                        );
-
-                        $a_input = array(
-                           'plugin_fusioninventory_taskjobstates_id'    => $data['id'],
-                           'items_id'                                   => $a_agent['id'],
-                           'itemtype'                                   => 'PluginFusioninventoryAgent',
-                           'date'                                       => date("Y-m-d H:i:s"),
-                           'comment'                                    => '',
-                           'state'                                      => PluginFusioninventoryTaskjoblog::TASK_STARTED
-                       );
-                        $pfTaskjoblog->add($a_input);
+                     $out = $pfCollect->run($taskjobstate, $agent);
+                     if (count($out) > 0) {
+                        $oder->jobs[] = $out;
                      }
+
+                     // change status of state table row
+                     $pfTaskjobstate->changeStatus(
+                        $taskjobstate->fields['id'],
+                        PluginFusioninventoryTaskjobstate::AGENT_HAS_SENT_DATA
+                     );
+
+                     $a_input = array(
+                        'plugin_fusioninventory_taskjobstates_id'    => $taskjobstate->fields['id'],
+                        'items_id'                                   => $agent['id'],
+                        'itemtype'                                   => 'PluginFusioninventoryAgent',
+                        'date'                                       => date("Y-m-d H:i:s"),
+                        'comment'                                    => '',
+                        'state'                                      => PluginFusioninventoryTaskjoblog::TASK_STARTED
+                     );
+                     $pfTaskjoblog->add($a_input);
+
                      if (count($order->jobs > 0)) {
                          $response = $order;
                      }
@@ -196,8 +196,6 @@ if (isset($_GET['action'])) {
          break;
    }
 
-
-   // send response
    if (count($response) > 0) {
       echo json_encode($response);
    } else {

@@ -109,13 +109,14 @@ class PluginFusioninventoryCollect_Registry_Content extends CommonDBTM {
       $query = "SELECT `id`, `key`, `value`
                 FROM `glpi_plugin_fusioninventory_collects_registries_contents`
                 WHERE `computers_id` = '".$computers_id."'
-                  AND `plugin_fusioninventory_collects_registries_id` = '".$collects_registries_id."'";
+                  AND `plugin_fusioninventory_collects_registries_id` =
+                  '".$collects_registries_id."'";
       $result = $DB->query($query);
       while ($data = $DB->fetch_assoc($result)) {
-         $reg_id = $data['id'];
+         $idtmp = $data['id'];
          unset($data['id']);
          $data1 = Toolbox::addslashes_deep($data);
-         $db_registries[$reg_id] = $data1;
+         $db_registries[$idtmp] = $data1;
       }
 
       foreach ($registry_data as $key => $value) {
@@ -153,6 +154,7 @@ class PluginFusioninventoryCollect_Registry_Content extends CommonDBTM {
 
 
    function showForCollect($collects_id) {
+
       $a_colregs = getAllDatasFromTable('glpi_plugin_fusioninventory_collects_registries',
                                               "`plugin_fusioninventory_collects_id`='".$collects_id."'");
       foreach ($a_colregs as $data) {

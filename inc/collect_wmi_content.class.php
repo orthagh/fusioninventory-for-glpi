@@ -110,7 +110,8 @@ class PluginFusioninventoryCollect_Wmi_Content extends CommonDBTM {
       $query = "SELECT `id`, `property`, `value`
                 FROM `glpi_plugin_fusioninventory_collects_wmis_contents`
                 WHERE `computers_id` = '".$computers_id."'
-                  AND `plugin_fusioninventory_collects_wmis_id` = '".$collects_wmis_id."'";
+                  AND `plugin_fusioninventory_collects_wmis_id` =
+                  '".$collects_wmis_id."'";
       $result = $DB->query($query);
       while ($data = $DB->fetch_assoc($result)) {
          $wmi_id = $data['id'];

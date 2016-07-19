@@ -127,10 +127,10 @@ class PluginFusioninventoryCollect_File_Content extends CommonDBTM {
                    '".$collects_files_id."'";
       $result = $DB->query($query);
       while ($data = $DB->fetch_assoc($result)) {
-         $file_id = $data['id'];
+         $idtmp = $data['id'];
          unset($data['id']);
          $data1 = Toolbox::addslashes_deep($data);
-         $db_files[$file_id] = $data1;
+         $db_files[$idtmp] = $data1;
       }
 
       foreach ($file_data as $key => $array) {

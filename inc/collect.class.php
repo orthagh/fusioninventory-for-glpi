@@ -504,11 +504,11 @@ class PluginFusioninventoryCollect extends CommonDBTM {
                   'limit'     => $files['limit'],
                   'recursive' => $files['is_recursive'],
                   'filter'    => array(
-                     'is_file' => $current['filter_is_file'],
-                     'is_dir'  => $current['filter_is_dir']
+                     'is_file' => $files['filter_is_file'],
+                     'is_dir'  => $files['filter_is_dir']
                   ),
-                  'uuid'      => $taskjob['uniqid'],
-                  '_sid'       => $current['id']
+                  'uuid'      => $taskjobstate->fields['uniqid'],
+                  '_sid'       => $files['id']
                );
                if ($files['filter_regex'] != '') {
                   $output['filter']['regex'] = $files['filter_regex'];
