@@ -101,8 +101,57 @@ class PluginFusioninventoryCollect_File_Content extends CommonDBTM {
    }
 
 
+   function updateComputer($computers_id, $collects_files_id, $taskjobstates_id) {
+      global $DB;
 
-   function updateComputer($computers_id, $file_data, $collects_files_id) {
+      $pfTaskjobstate = new PluginFusioninventoryTaskjobstate();
+      $pfTaskjobstate->getFromDB($taskjobstates_id);
+
+      if ($pfTaskjobstate->fields['specificity'] == '') {
+         $a_data = $this->find("`computers_id` = '".$computers_id."'
+                 AND `plugin_fusioninventory_collects_files_id`=
+                  '".$collects_files_id."'");
+         foreach ($a_data as $data) {
+            $this->delete($data);
+         }
+         return;
+      }
+      // Have files found
+      $file_data = importArrayFromDB($pfTaskjobstate->fields['specificity']);
+
+      $db_files = array();
+      $query = "SELECT `id`, `pathfile`, `size`
+                FROM `glpi_plugin_fusioninventory_collects_files_contents`
+                WHERE `computers_id` = '".$computers_id."'
+                   AND `plugin_fusioninventory_collects_files_id`=
+                   '".$collects_files_id."'";
+      $result = $DB->query($query);
+      while ($data = $DB->fetch_assoc($result)) {
+         $file_id = $data['id'];
+         unset($data['id']);
+         $data1 = Toolbox::addslashes_deep($data);
+         $db_files[$file_id] = $data1;
+      }
+
+      foreach ($file_data as $key => $array) {
+         foreach ($db_files as $keydb => $arraydb) {
+            if ($arraydb['pathfile'] == $array['path']) {
+               $input = array(
+                  'id'   => $keydb,
+                  'size' => $array['size']
+               );
+               $this->update($input);
+               unset($file_data[$key]);
+               unset($db_files[$keydb]);
+               break;
+            }
+         }
+      }
+
+      foreach ($db_files as $idtmp => $data) {
+         $this->delete(array('id'=>$idtmp), 1);
+      }
+
       foreach($file_data as $key => $value) {
          $input = array(
             'computers_id' => $computers_id,
@@ -110,13 +159,14 @@ class PluginFusioninventoryCollect_File_Content extends CommonDBTM {
             'pathfile'     => $value['path'],
             'size'         => $value['size']
          );
-         $id = $this->add($input);
+         $this->add($input);
       }
    }
 
 
 
    function showForCollect($collects_id) {
+
       $a_colfiles = getAllDatasFromTable('glpi_plugin_fusioninventory_collects_files',
                                               "`plugin_fusioninventory_collects_id`='".$collects_id."'");
       foreach ($a_colfiles as $data) {
