@@ -142,7 +142,7 @@ class PluginFusioninventoryCollect_File_Content extends CommonDBTM {
          $input = array(
             'computers_id' => $computers_id,
             'plugin_fusioninventory_collects_files_id' => $collects_files_id,
-            'pathfile'     => $value['path'],
+            'pathfile'     => str_replace(['\\', '//'], ['/', '/'], $value['path']),
             'size'         => $value['size']
          );
          $this->add($input);
