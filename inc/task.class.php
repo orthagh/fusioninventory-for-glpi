@@ -1552,6 +1552,9 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
          }
       }
 
+      // clean old temporary variables
+      unset($task, $job, $target, $agent);
+
       if (!DEBUG_CSV) {
          define('SEP', ';');
          define('NL', "\r\n");
@@ -1588,7 +1591,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
 
          if (count($task['jobs']) == 0) {
             echo NL;
-         } foreach ($task['jobs'] as $job_id => $job) {
+         } else foreach ($task['jobs'] as $job_id => $job) {
             echo $job['name'].SEP;
             echo $job['method'].SEP;
 
